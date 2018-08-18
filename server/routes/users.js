@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 const model = require('../utils/model')
 const User = model.getModel('user')
+const Chat = model.getModel('chat')
 const utils = require('utility')
 
 const _filter = {pwd:0,__v:0}//用于查询结果筛选字段
@@ -19,8 +20,12 @@ router.get('/info', function(req, res, next) {
   })
 });
 router.get('/list', function(req, res, next) {
-  User.find({},function(err,doc){
-    res.json(doc)
+  var {type} = req.query;
+  User.find({type},function(err,docs){
+    if(err){
+      res.json({code:1})
+    }
+    res.json({code:0,data:docs})
   })
 });
 router.post('/register',function(req,res){
@@ -45,7 +50,7 @@ router.post('/login',function(req,res){
   var {user,pwd} = req.body
   User.findOne({user,pwd:md5(pwd)},_filter,function(e,d){
     if(!d){
-      res.json({code:1,msg:"用户名或密码错误"})
+      return res.json({code:1,msg:"用户名或密码错误"})
     }
     res.cookie('userid',d._id)//登陆成功设置cookie
     return res.json({code:0,data:d})
@@ -61,8 +66,37 @@ router.post('/update',function(req,res){
     if(e){
       res.json({code:1,msg:"更新信息失败"})
     }
-    var data = Object.assign({},req.body)
+    var data = Object.assign({},{
+			user:d.user,
+			type:d.type
+		},req.body)
     return res.json({code:0,data:data})
+  })
+})
+
+router.post('/getmsglist',function(req,res){
+  var userid = req.cookies.userid;
+  User.find({},function(err,usersdoc){
+    var users = {}
+		usersdoc.forEach(v=>{
+			users[v._id] = {name:v.user, avatar:v.avatar}
+		})
+    Chat.find({"$or":[{from:userid},{to:userid}]},function(err,msglist){
+      if(!err){
+        res.json({code:0,msglist,users})
+      }
+    })
+  })
+})
+
+router.post('/readmsg',function(req,res){
+  const from = req.body.from;
+  const userid = req.cookies.userid;
+  Chat.update({from,to:userid},{"$set":{read:true}},{'multi':true},function(err,doc){
+    if(!err){
+       return res.json({code:0,num:doc.nModified})
+    }
+    return res.json({code:1,msg:'修改失败'})
   })
 })
 //密码加密

@@ -10,13 +10,11 @@ import {Redirect} from 'react-router-dom'
   {update}
 )
 
-class Bossinfo extends React.Component{
+class Geniusinfo extends React.Component{
   constructor(props){
     super(props)
     this.state={
       title:"",
-      company:"",
-      money:"",
       desc:"",
       avatar:""
     }
@@ -37,10 +35,8 @@ class Bossinfo extends React.Component{
         <AvatarSelector chooseAvatar={this.handChange}></AvatarSelector>
         <WhiteSpace />
         <List>
-          <InputItem onChange={(v)=>this.handChange('title',v)}>招聘职位</InputItem>
-          <InputItem onChange={(v)=>this.handChange('company',v)}>公司名称</InputItem>
-          <InputItem onChange={(v)=>this.handChange('money',v)}>职位薪资</InputItem>
-          <TextareaItem rows={3} autoHeight onChange={(v)=>this.handChange('desc',v)} title="职位要求"></TextareaItem>
+          <InputItem onChange={(v)=>this.handChange('title',v)}>求职岗位</InputItem>
+          <TextareaItem rows={3} autoHeight onChange={(v)=>this.handChange('desc',v)} title="个人简介"></TextareaItem>
           <WhiteSpace />
           <Button type="primary" onClick={()=>{this.props.update(this.state)}}>保存</Button>
         </List>
@@ -49,4 +45,4 @@ class Bossinfo extends React.Component{
   }
 }
 
-export default Bossinfo
+export default Geniusinfo

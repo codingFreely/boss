@@ -1,12 +1,9 @@
 #!/usr/bin/env node
 
-/**
- * Module dependencies.
- */
-
 var app = require('../app');
 var debug = require('debug')('server:server');
 var http = require('http');
+var chat = require('../utils/model').getModel('chat')
 
 /**
  * Get port from environment and store in Express.
@@ -20,6 +17,7 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
+const io = require('socket.io')(server)
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -28,6 +26,18 @@ var server = http.createServer(app);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
+
+io.on('connection',function(socket){ //io是全局的
+  console.log('socket connect success')
+  //socket是本次连接的，io emit所有客户端都会收到，socket emit只有本次连接的客户端收到
+  socket.on('sendMsg',function(data){
+    var {from,to,msg} = data;
+    var chatid = [from,to].sort().join('_')//sort方法数组排序
+    chat.create({chatid,from,to,content:msg},function(err,doc){
+      io.emit('recMsg',Object.assign({},doc._doc))
+    })
+  })
+})
 
 /**
  * Normalize a port into a number, string, or false.

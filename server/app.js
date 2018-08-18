@@ -14,6 +14,13 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'html');
 
+app.use(function(req,res,next){
+  if(req.url.startsWith('/users/')||req.url.startsWith('/static/')){
+    return next()
+  }
+  return res.sendFile(path.resolve('build/index.html'))
+})
+app.use('/',express.static(path.resolve('build')))
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

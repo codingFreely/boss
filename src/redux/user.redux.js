@@ -6,12 +6,14 @@ import {getRedirectPath} from '../util'
 const AUTH_SUCCESS = 'AUTH_SUCCESS'
 const ERROR_MSG = 'ERROR_MSG'
 const LOAD_DATA = 'LOAD_DATA'
+const LOGIN_OUT = 'LOGIN_OUT'
 
 const initState = {
   redirectTo:'',
   msg:'',
   user:'',
-  type:''//boss or genius
+  type:'',//boss or genius
+  _id:''
 }
 
 export function user(state = initState,action){
@@ -22,6 +24,9 @@ export function user(state = initState,action){
     case LOAD_DATA:
       return {...state,isAuth:true,...action.data}
       break;
+    case LOGIN_OUT:
+      return {...initState,redirectTo:"/login"}
+      break;     
     case ERROR_MSG:
       return {...state,isAuth:false,msg:action.msg}
       break;
@@ -51,6 +56,9 @@ function errorMsg(msg){
   return {msg:msg,type:ERROR_MSG}
 }
 
+export function loginOutSubmit(){
+  return {type:LOGIN_OUT}
+}
 //既有同步action又有异步action
 export function register({user,pwd,repeatpwd,type}){
   if(!user||!pwd||!type){
@@ -86,9 +94,9 @@ export function login({user,pwd}){
 }
 
 export function update({title,company,money,desc,avatar}){
-  if(!title||!company||!money||!desc||!avatar){
-    return errorMsg('请填写完整的用户信息')
-  }
+  // if(!title||!company||!money||!desc||!avatar){
+  //   return errorMsg('请填写完整的用户信息')
+  // }
   return (dispatch)=>{
     aixos.post('/users/update',{title,company,money,desc,avatar}).then(res=>{
       if(res.status===200&&res.data.code===0){
